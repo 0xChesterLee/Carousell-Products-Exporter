@@ -2,9 +2,6 @@
 .venv-win
 .venv-mac
 
-# Tokens / Keys / Cookies Files
-secret/
-
 # Mac-OS Only
 .DS_Store
 
