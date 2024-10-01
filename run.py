@@ -13,6 +13,15 @@ from PIL import Image
 from io import BytesIO
 
 
+# Set up the WebDriver using the ChromeDriverManager
+chrome_options = Options()
+chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1')
+
+# Set up the WebDriver using the ChromeDriverManager
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=chrome_options)
+
+
 def clean_filename(filename):
     # Define a regex pattern for invalid characters
     invalid_chars_pattern = r'[<>:"/\\|?*\x00-\x1F]'
@@ -111,20 +120,13 @@ def extract_url_from_json():
 
     print("Extracted URLs saved to urls.txt.")
 
-def extract_carousell_product_info(url):
-    # Set up the WebDriver using the ChromeDriverManager
-    chrome_options = Options()
-    chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1')
-
-    # Set up the WebDriver using the ChromeDriverManager
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+def extract_carousell_product_info(url, driver):
 
     # Open a webpage
     driver.get(url)
 
     # Wait for the page to load
-    time.sleep(1)  # Adjust sleep time as needed
+    time.sleep(0.75)  # Adjust sleep time as needed
 
     # Extract product details using the specified XPaths
     product_details = {}
@@ -137,18 +139,30 @@ def extract_carousell_product_info(url):
         print(product_details["product_name"])
 
         # Extract product price
-        product_price_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_price"]/div/div/div/div/h2')
-        product_details["product_price"] = product_price_element.text
+        try:
+            product_price_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_price"]/div/div/div/div/h2')
+            product_details["product_price"] = product_price_element.text
+        except Exception as e:
+            print(f"Error extracting product price.")
+            product_details["product_price"] = 'HK$0'
         print(product_details["product_price"])
 
         # Extract product type
-        product_type_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_listing_details_bp_v2"]/div/div[2]/div/p/span')
-        product_details["product_type"] = product_type_element.text
+        try:
+            product_type_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_listing_details_bp_v2"]/div/div[2]/div/p/span')
+            product_details["product_type"] = product_type_element.text
+        except Exception as e:
+            print(f"Error extracting product type.")
+            product_details["product_type"] = 'Other'
         print(product_details["product_type"])
 
         # Extract product description
-        product_description_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_description"]/div/div/p')
-        product_details["product_description"] = product_description_element.text
+        try:
+            product_description_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_description"]/div/div/p')
+            product_details["product_description"] = product_description_element.text
+        except Exception as e:
+            print(f"Error extracting product description.")
+            product_details["product_description"] = ''
         print(product_details["product_description"])
 
         # Extract image URLs
@@ -207,8 +221,7 @@ def extract_carousell_product_info(url):
 
     print('{0} Saved.\n'.format(str(product_details["product_name"])))
 
-    # Close the browser
-    driver.quit()
+    return
 
 def convert_json_to_excel():
     # Load the JSON data from the specified file
@@ -222,10 +235,11 @@ def convert_json_to_excel():
     df.to_excel('output.xlsx', index=False)
 
     print('Data successfully written to output.xlsx')
+    return
 
 
 # Start
-extract_carousell2json('ihlove')
+extract_carousell2json('momokosakura888')
 extract_url_from_json()
 
 with open('urls.txt', 'r') as file:
@@ -233,8 +247,10 @@ with open('urls.txt', 'r') as file:
 for url in urls:
         url = url.strip()  # Remove any leading/trailing whitespace/newline characters
         if url:  # Check if the URL is not empty
-            extract_carousell_product_info(url) 
+            extract_carousell_product_info(url, driver=driver) 
             print(url + 'OK!')
+# Close the browser
+driver.quit()
 
 convert_json_to_excel()
 
