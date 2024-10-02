@@ -11,6 +11,7 @@ import requests
 import re
 from PIL import Image
 from io import BytesIO
+import urllib.parse
 
 
 def clean_filename(filename):
@@ -24,10 +25,13 @@ def clean_filename(filename):
     # Replace invalid characters with an underscore
     cleaned_filename = re.sub(invalid_chars_pattern, '_', filename)
     
+    # Replace '@' with a hyphen
+    cleaned_filename = cleaned_filename.replace('@', '-')
+    
     # Replace spaces with hyphens
     cleaned_filename = cleaned_filename.replace(' ', '-')
     
-    # Optionally, strip leading/trailing whitespace and limit length
+    # Strip leading/trailing whitespace
     cleaned_filename = cleaned_filename.strip()
     
     # Limit the filename length to a reasonable maximum (e.g., 255 characters)
@@ -38,7 +42,13 @@ def clean_filename(filename):
     # Ensure the cleaned filename is not empty
     if not cleaned_filename:
         cleaned_filename = 'default_filename'
+
+    # Convert to lowercase for URL compatibility
+    cleaned_filename = cleaned_filename.lower()
     
+    # Encode for URL safety
+    cleaned_filename = urllib.parse.quote(cleaned_filename)
+
     return cleaned_filename
 
 def extract_carousell2json(username):
@@ -277,8 +287,8 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 print('Program Start.')
 
-extract_carousell2json('ihlove') # carousell user id
-extract_url_from_json()
+#extract_carousell2json('ihlove') # carousell user id
+#extract_url_from_json()
 
 with open('urls.txt', 'r') as file:
         urls = file.readlines()
