@@ -93,12 +93,6 @@ def extract_carousell2json(username):
 
     print("Data saved to output.json")
 
-    # Alternatively, wait for user input to close the browser
-    input('Press Enter to close the browser...')
-
-    # Close the browser
-    driver.quit()
-
 def extract_url_from_json():
     # Load the JSON data from the file
     with open('output.json', 'r') as json_file:
@@ -126,25 +120,32 @@ def extract_carousell_product_info(url, driver):
     driver.get(url)
 
     # Wait for the page to load
-    time.sleep(0.75)  # Adjust sleep time as needed
+    time.sleep(1)  # Adjust sleep time as needed
 
     # Extract product details using the specified XPaths
     product_details = {}
     image_urls = []
 
     try:
-        # Extract product name
-        product_name_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_title"]/div/div/h1')
-        product_details["product_name"] = product_name_element.text
+        try:
+            # Extract product name
+            product_name_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_title"]/div/div/h1')
+            product_details["product_name"] = product_name_element.text
+        except Exception as e:
+            print(f"Error extracting product name.")
+            product_details["product_name"] = ''
+            return
         print(product_details["product_name"])
 
         # Extract product price
         try:
             product_price_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_price"]/div/div/div/div/h2')
             product_details["product_price"] = product_price_element.text
+            product_details["product_price"] = str(product_details["product_price"]).upper().replace('HK$', '')
+            product_details["product_price"] = float(product_details["product_price"])
         except Exception as e:
             print(f"Error extracting product price.")
-            product_details["product_price"] = 'HK$0'
+            product_details["product_price"] = float(0)
         print(product_details["product_price"])
 
         # Extract product type
@@ -176,6 +177,8 @@ def extract_carousell_product_info(url, driver):
         print(f"Error extracting product details: {e}")
         driver.quit()
         return
+    
+    product_details["product_images"] = ''
 
     # Create a directory to save images
     os.makedirs('images', exist_ok=True)
@@ -200,9 +203,12 @@ def extract_carousell_product_info(url, driver):
             with Image.open(BytesIO(img_data)) as img:
                 img = img.resize((512, 512), Image.LANCZOS)  # Resize to 512x512
                 img.save(img_name)  # Save the resized image
+                product_details["product_images"] = product_details["product_images"] + 'https://localhost/{0}|'.format(img_name)
                 i = i + 1
         except Exception as e:
             print(f"Failed to download {img_url}: {e}")
+    
+    product_details["product_images"] = product_details["product_images"][-1]
     
     # Append the extracted details to the JSON file
     try:
@@ -239,7 +245,9 @@ def convert_json_to_excel():
 
 
 # Start
-extract_carousell2json('momokosakura888')
+print('Program Start.')
+
+extract_carousell2json('ihlove') # carousell user id
 extract_url_from_json()
 
 with open('urls.txt', 'r') as file:
