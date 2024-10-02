@@ -290,8 +290,8 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 print('Program Start.')
 
-# extract_carousell2json('ihlove') # carousell user id
-# extract_url_from_json()
+extract_carousell2json('ihlove') # carousell user id
+extract_url_from_json()
 
 with open('urls.txt', 'r') as file:
         urls = file.readlines()
