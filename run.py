@@ -9,6 +9,7 @@ import pandas as pd
 import os
 import requests
 import re
+import urllib.parse
 from PIL import Image
 from io import BytesIO
 
@@ -24,11 +25,11 @@ def clean_filename(filename):
     # Replace invalid characters with an underscore
     cleaned_filename = re.sub(invalid_chars_pattern, '_', filename)
     
-    # Replace spaces with hyphens
+    # Replace spaces and '@' with hyphens
     cleaned_filename = cleaned_filename.replace(' ', '-')
     cleaned_filename = cleaned_filename.replace('@', '-')
 
-    # Optionally, strip leading/trailing whitespace and limit length
+    # Strip leading/trailing whitespace
     cleaned_filename = cleaned_filename.strip()
     
     # Limit the filename length to a reasonable maximum (e.g., 255 characters)
@@ -39,7 +40,13 @@ def clean_filename(filename):
     # Ensure the cleaned filename is not empty
     if not cleaned_filename:
         cleaned_filename = 'default_filename'
-    
+
+    # Convert to lowercase for URL compatibility
+    cleaned_filename = cleaned_filename.lower()
+
+    # Encode for URL safety
+    cleaned_filename = urllib.parse.quote(cleaned_filename)
+
     return cleaned_filename
 
 def extract_carousell2json(username):
