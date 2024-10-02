@@ -8,9 +8,9 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import os
 import requests
-import re
 from PIL import Image
 from io import BytesIO
+import re
 import urllib.parse
 
 
@@ -24,9 +24,6 @@ def clean_filename(filename):
 
     # Replace invalid characters with an underscore
     cleaned_filename = re.sub(invalid_chars_pattern, '_', filename)
-    
-    # Replace '@' with a hyphen
-    cleaned_filename = cleaned_filename.replace('@', '-')
     
     # Replace spaces with hyphens
     cleaned_filename = cleaned_filename.replace(' ', '-')
@@ -287,8 +284,8 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 print('Program Start.')
 
-#extract_carousell2json('ihlove') # carousell user id
-#extract_url_from_json()
+extract_carousell2json('ihlove') # carousell user id
+extract_url_from_json()
 
 with open('urls.txt', 'r') as file:
         urls = file.readlines()
