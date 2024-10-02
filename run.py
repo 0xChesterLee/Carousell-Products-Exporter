@@ -116,11 +116,11 @@ def extract_url_from_json():
     with open('urls.txt', 'r') as file:
         lines = file.readlines()
 
-    # Remove the last two lines only if there are two or more lines
-    if len(lines) > 2:
-        lines = lines[:-2]
+    # Remove the last lines only if there are one or more lines
+    if len(lines) > 1:
+        lines = lines[:-1]
     else:
-        lines = []  # Clear the list if there are fewer than two lines
+        lines = []  # Clear the list if there are fewer than one lines
 
     # Write the remaining lines back to the file
     with open('urls.txt', 'w') as file:
@@ -223,7 +223,7 @@ def extract_carousell_product_info(url, driver):
             print(f"Failed to download {img_url}: {e}")
     
     if len(product_details["product_images"]) > 1:
-        product_details["product_images"][-1]
+        product_details["product_images"][:-1]
     
     # Append the extracted details to the JSON file
     try:
