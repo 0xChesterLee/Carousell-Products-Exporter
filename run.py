@@ -44,14 +44,6 @@ def clean_filename(filename):
     return cleaned_filename
 
 def extract_carousell2json(username):
-    # Set up the WebDriver using the ChromeDriverManager
-    chrome_options = Options()
-    chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1')
-
-    # Set up the WebDriver using the ChromeDriverManager
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-
     # Open a webpage
     driver.get('https://www.carousell.com.hk/u/{0}/'.format(username))
 
@@ -92,6 +84,8 @@ def extract_carousell2json(username):
         json.dump(data, json_file, indent=4)
 
     print("Data saved to output.json")
+
+    return
 
 def extract_url_from_json():
     # Load the JSON data from the file
