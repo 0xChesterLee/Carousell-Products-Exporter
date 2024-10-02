@@ -31,14 +31,20 @@ def clean_filename(filename):
     filename = remove_emoji(filename)
     
     # Replace invalid characters with an underscore, but keep all valid UTF-8 characters
-    cleaned_filename = re.sub(invalid_chars_pattern, '_', filename)
+    cleaned_filename = re.sub(invalid_chars_pattern, '', filename)
 
     # Normalize spaces: replace multiple spaces with a single space
     cleaned_filename = re.sub(r'\s+', ' ', cleaned_filename)
 
     # Replace spaces with hyphens
     cleaned_filename = cleaned_filename.replace(' ', '-')
+    cleaned_filename = cleaned_filename.replace('+', '')
     cleaned_filename = cleaned_filename.replace('@', '-')
+    cleaned_filename = cleaned_filename.replace('#', '-')
+    cleaned_filename = cleaned_filename.replace('(', '-')
+    cleaned_filename = cleaned_filename.replace(')', '-')
+    cleaned_filename = cleaned_filename.replace('&', '')
+    cleaned_filename = cleaned_filename.replace(',', '')
 
     # Strip leading/trailing whitespace
     cleaned_filename = cleaned_filename.strip()
@@ -52,6 +58,7 @@ def clean_filename(filename):
     if not cleaned_filename:
         cleaned_filename = 'default_filename'
     
+    cleaned_filename = cleaned_filename.replace('--', '-')
     return cleaned_filename
 
 def extract_carousell2json(username):
@@ -151,6 +158,7 @@ def extract_carousell_product_info(url, driver):
 
     # Open a webpage
     driver.get(url)
+    driver.minimize_window()
 
     # Wait for the page to load
     time.sleep(1)  # Adjust sleep time as needed
@@ -234,7 +242,7 @@ def extract_carousell_product_info(url, driver):
 
             # Open the image and resize it
             with Image.open(BytesIO(img_data)) as img:
-                img = img.resize((512, 512), Image.LANCZOS)  # Resize to 512x512
+                img = img.resize((1024, 1024), Image.LANCZOS)  # Resize
                 img.save(img_name)  # Save the resized image
                 product_images = product_images + 'https://localhost/{0}|'.format(img_name)
                 i = i + 1
@@ -290,15 +298,15 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 print('Program Start.')
 
-extract_carousell2json('ihlove') # carousell user id
-extract_url_from_json()
+#extract_carousell2json('ihlove') # carousell user id
+#extract_url_from_json()
 
 with open('urls.txt', 'r') as file:
         urls = file.readlines()
 for url in urls:
         url = url.strip()  # Remove any leading/trailing whitespace/newline characters
         if url:  # Check if the URL is not empty
-            extract_carousell_product_info(url, driver=driver) 
+            extract_carousell_product_info(url, driver=driver)
             print(url + 'OK!')
 # Close the browser
 driver.quit()
