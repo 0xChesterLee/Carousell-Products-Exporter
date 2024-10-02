@@ -13,23 +13,21 @@ from PIL import Image
 from io import BytesIO
 
 
-# Set up the WebDriver using the ChromeDriverManager
-chrome_options = Options()
-chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1')
-
-# Set up the WebDriver using the ChromeDriverManager
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service, options=chrome_options)
-
-
 def clean_filename(filename):
-    # Define a regex pattern for invalid characters
+    # Define a regex pattern for invalid characters and emojis
     invalid_chars_pattern = r'[<>:"/\\|?*\x00-\x1F]'
-    
+    emoji_pattern = r'[\U0001F600-\U0001F64F|\U0001F300-\U0001F5FF|\U0001F680-\U0001F6FF|\U0001F700-\U0001F77F|\U0001F780-\U0001F7FF|\U0001F800-\U0001F8FF|\U0001F900-\U0001F9FF|\U0001FA00-\U0001FAFF|\U00002702-\U000027B0|\U000024C2-\U0001F251]'
+
+    # Remove emojis
+    filename = re.sub(emoji_pattern, '', filename)
+
     # Replace invalid characters with an underscore
     cleaned_filename = re.sub(invalid_chars_pattern, '_', filename)
     
-    # Optionally, you can also strip leading/trailing whitespace and limit length
+    # Replace spaces with hyphens
+    cleaned_filename = cleaned_filename.replace(' ', '-')
+    
+    # Optionally, strip leading/trailing whitespace and limit length
     cleaned_filename = cleaned_filename.strip()
     
     # Limit the filename length to a reasonable maximum (e.g., 255 characters)
@@ -119,8 +117,22 @@ def extract_url_from_json():
     # Write the remaining lines back to the file
     with open('urls.txt', 'w') as file:
         file.writelines(lines)
-        
+
+    # Read the contents of the file
+    with open('urls.txt', 'r') as file:
+        lines = file.readlines()
+
+    # Check if the last line is empty and remove it
+    if lines and lines[-1].strip() == '':  # Check if the last line is empty
+        lines.pop()  # Remove the last line
+
+    # Write the remaining lines back to the file
+    with open('urls.txt', 'w') as file:
+        file.writelines(lines)
+
     print("Extracted URLs saved to urls.txt.")
+
+    return
 
 def extract_carousell_product_info(url, driver):
 
@@ -175,7 +187,7 @@ def extract_carousell_product_info(url, driver):
         print(product_details["product_description"])
 
         # Extract image URLs
-        image_elements = driver.find_elements("xpath", '//div[@class="D_aew M_aas"]//img')
+        image_elements = driver.find_elements("xpath", '//*[@id="FieldSetGroup-Container-photo_group"]//img')
         for img in image_elements:
             src = img.get_attribute("src")
             if src:  # Ensure the src is not None or empty
@@ -186,7 +198,7 @@ def extract_carousell_product_info(url, driver):
         driver.quit()
         return
     
-    product_details["product_images"] = ''
+    product_images = ''
 
     # Create a directory to save images
     os.makedirs('images', exist_ok=True)
@@ -211,14 +223,15 @@ def extract_carousell_product_info(url, driver):
             with Image.open(BytesIO(img_data)) as img:
                 img = img.resize((512, 512), Image.LANCZOS)  # Resize to 512x512
                 img.save(img_name)  # Save the resized image
-                product_details["product_images"] = product_details["product_images"] + 'https://localhost/{0}|'.format(img_name)
+                product_images = product_images + 'https://localhost/{0}|'.format(img_name)
                 i = i + 1
         except Exception as e:
             print(f"Failed to download {img_url}: {e}")
     
-    if len(product_details["product_images"]) > 1:
-        product_details["product_images"][:-1]
-    
+    product_images = product_images.replace('\\', '/')
+    product_images = product_images[:-1]
+    product_details["product_images"] = product_images
+
     # Append the extracted details to the JSON file
     try:
         # Load existing data
@@ -254,6 +267,14 @@ def convert_json_to_excel():
 
 
 # Start
+# Set up the WebDriver using the ChromeDriverManager
+chrome_options = Options()
+chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1')
+
+# Set up the WebDriver using the ChromeDriverManager
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=chrome_options)
+
 print('Program Start.')
 
 extract_carousell2json('ihlove') # carousell user id
@@ -265,7 +286,7 @@ for url in urls:
         url = url.strip()  # Remove any leading/trailing whitespace/newline characters
         if url:  # Check if the URL is not empty
             extract_carousell_product_info(url, driver=driver) 
-            print(url + 'OK!')
+            print(url + 'OK!\n\n')
 # Close the browser
 driver.quit()
 
