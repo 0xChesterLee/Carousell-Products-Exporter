@@ -40,11 +40,21 @@ def clean_filename(filename):
     cleaned_filename = cleaned_filename.replace(' ', '-')
     cleaned_filename = cleaned_filename.replace('+', '')
     cleaned_filename = cleaned_filename.replace('@', '-')
+    cleaned_filename = cleaned_filename.replace('$', '-')
+    cleaned_filename = cleaned_filename.replace('^', '-')
+    cleaned_filename = cleaned_filename.replace('!', '-')
+    cleaned_filename = cleaned_filename.replace('*', '-')
+    cleaned_filename = cleaned_filename.replace('%', '-')
     cleaned_filename = cleaned_filename.replace('#', '-')
     cleaned_filename = cleaned_filename.replace('(', '-')
     cleaned_filename = cleaned_filename.replace(')', '-')
     cleaned_filename = cleaned_filename.replace('&', '')
     cleaned_filename = cleaned_filename.replace(',', '')
+    cleaned_filename = cleaned_filename.replace('.', '-')
+    cleaned_filename = cleaned_filename.replace('[', '-')
+    cleaned_filename = cleaned_filename.replace(']', '-')
+    cleaned_filename = cleaned_filename.replace('{', '-')
+    cleaned_filename = cleaned_filename.replace('}', '-')
 
     # Strip leading/trailing whitespace
     cleaned_filename = cleaned_filename.strip()
@@ -298,8 +308,8 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 print('Program Start.')
 
-#extract_carousell2json('ihlove') # carousell user id
-#extract_url_from_json()
+extract_carousell2json('ihlove') # carousell user id
+extract_url_from_json()
 
 with open('urls.txt', 'r') as file:
         urls = file.readlines()
