@@ -50,7 +50,6 @@ def clean_filename(filename):
     cleaned_filename = cleaned_filename.replace(')', '-')
     cleaned_filename = cleaned_filename.replace('&', '')
     cleaned_filename = cleaned_filename.replace(',', '')
-    cleaned_filename = cleaned_filename.replace('.', '-')
     cleaned_filename = cleaned_filename.replace('[', '-')
     cleaned_filename = cleaned_filename.replace(']', '-')
     cleaned_filename = cleaned_filename.replace('{', '-')
@@ -252,7 +251,7 @@ def extract_carousell_product_info(url, driver):
 
             # Open the image and resize it
             with Image.open(BytesIO(img_data)) as img:
-                img = img.resize((1024, 1024), Image.LANCZOS)  # Resize
+                img = img.resize((1080, 1080), Image.LANCZOS)  # Resize
                 img.save(img_name)  # Save the resized image
                 product_images = product_images + 'https://localhost/{0}|'.format(img_name)
                 i = i + 1
