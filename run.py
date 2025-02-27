@@ -95,7 +95,7 @@ def extract_carousell2json(username):
         last_height = new_height
 
     # Find the div using XPath
-    xpath_expression = '//*[@id="main"]/div/div[3]'  # Replace with the actual XPath expression
+    xpath_expression = '//*[@id="main"]/div/div[5]'  # Replace with the actual XPath expression
     div_element = driver.find_element('xpath', xpath_expression)
 
     # Extract the text or inner HTML from the div
@@ -177,6 +177,17 @@ def extract_carousell_product_info(url, driver):
     image_urls = []
 
     try:
+        
+        try:
+            # Extract product date
+            product_name_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_listing_details_bp_v2"]/div/div[3]/div/p/span')
+            product_details["product_date"] = product_name_element.text
+        except Exception as e:
+            print(f"Error extracting product date.")
+            product_details["product_date"] = ''
+            return
+        print(product_details["product_date"])
+
         try:
             # Extract product name
             product_name_element = driver.find_element("xpath", '//*[@id="FieldSetField-Container-field_title"]/div/div/h1')
